@@ -1,6 +1,8 @@
 Here's the **README.md** file with **environment (.env) configuration** and **SQL setup instructions** included:  
 
----
+---![Screenshot (394)](https://github.com/user-attachments/assets/fa427812-fcf8-48b5-9983-a7fe12dc2c53)
+
+![Screenshot (396)](https://github.com/user-attachments/assets/6385d4d3-e32a-40e7-af3c-53551cdc8247)
 
 ```md
 # Real-Time Chat Application
