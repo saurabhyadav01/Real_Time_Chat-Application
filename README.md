@@ -52,9 +52,7 @@ cd Real_Time_Chat-Application
    DB_USER=root
    DB_PASSWORD=your_password
    DB_NAME=chat_app
-
-   # JWT Secret (if using authentication)
-   JWT_SECRET=your_secret_key
+   OPENAI_API_KEY=
    ```
 4. Start the backend server:
    ```sh
@@ -123,15 +121,6 @@ cd Real_Time_Chat-Application
 - **Frontend:** React.js, Tailwind CSS
 - **Database:** MySQL
 
----
-
-## 📜 License
-This project is licensed under the MIT License.
-
----
-
-## 🤝 Contributing
-Feel free to submit issues or pull requests for improvements!
 
 ---
 
