@@ -107,7 +107,7 @@ cd Real_Time_Chat-Application
 2. Start the **frontend**:  
    ```sh
    cd frontend
-   npm start
+   node server.ts
    ```
 3. Open the application in your browser:  
    ```
