@@ -4,6 +4,7 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const { db } = require("./config"); // Import database config
+const axios = require("axios"); // OpenAI API calls
 
 dotenv.config();
 
@@ -20,19 +21,19 @@ app.use(express.json()); // Allow JSON requests
 
 let activeUsers = new Map(); // Track active users (username -> socket ID)
 
-// Ensure database connection is established
+// ** Ensure database connection **
 async function connectDB() {
   try {
     global.db = await db;
-    console.log("✅ Database connected successfully!");
+    console.log("Database connected successfully!");
   } catch (error) {
-    console.error("❌ Database connection failed:", error);
+    console.error("Database connection failed:", error);
   }
 }
 
 connectDB();
 
-// Fetch previous messages from the database
+// ** Fetch previous messages **
 app.get("/messages", async (req, res) => {
   try {
     const [rows] = await global.db.execute(
@@ -40,36 +41,58 @@ app.get("/messages", async (req, res) => {
     );
     res.json(rows);
   } catch (error) {
-    console.error("❌ Error fetching messages:", error);
+    console.error("Error fetching messages:", error);
     res.status(500).json({ error: "Failed to fetch messages" });
   }
 });
 
+// ** OpenAI Chatbot Function **
+async function getChatbotResponse(userMessage) {
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: userMessage }],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data.choices[0].message.content;
+  } catch (error) {
+    console.error("Error getting chatbot response:", error.response?.data || error.message);
+    return "I'm sorry, but I couldn't process your request.";
+  }
+}
+
 // ** Socket.io Real-Time Chat Logic **
 io.on("connection", (socket) => {
-  console.log("🔵 New user connected:", socket.id);
+  console.log("New user connected:", socket.id);
 
+  // ** User joins chat **
   socket.on("joinChat", async (username) => {
     if (activeUsers.has(username)) {
-      // Username already exists
-      socket.emit("joinError", "Username is already taken. Try another.");
+      socket.emit("joinError", "Username already taken. Try another.");
     } else {
-      // Add user to active list
       activeUsers.set(username, socket.id);
       socket.username = username;
 
-      // Notify everyone
+      // Notify all users
       io.emit("message", {
         username: "System",
         message: `${username} joined the chat`,
         system: true,
       });
 
-      // Send success message to user
       socket.emit("joinSuccess", username);
     }
   });
 
+  // ** Handle user messages **
   socket.on("chatMessage", async (msg) => {
     if (!socket.username) return;
 
@@ -80,7 +103,7 @@ io.on("connection", (socket) => {
     };
 
     try {
-      // Insert message into database
+      // Store message in database
       await global.db.execute(
         "INSERT INTO messages (username, message, timestamp) VALUES (?, ?, ?)",
         [messageData.username, messageData.message, messageData.timestamp]
@@ -88,11 +111,27 @@ io.on("connection", (socket) => {
 
       // Broadcast message to all users
       io.emit("message", messageData);
+
+      // If the message contains "@Chatbot" OR it's a direct question, get chatbot response
+      if (msg.toLowerCase().includes("@chatbot") || msg.endsWith("?")) {
+        io.emit("typing", { username: "Chatbot", typing: true });
+
+        const botResponse = await getChatbotResponse(msg);
+
+        io.emit("message", {
+          username: "Chatbot",
+          message: botResponse,
+          timestamp: new Date().toISOString(),
+        });
+
+        io.emit("typing", { username: "Chatbot", typing: false });
+      }
     } catch (error) {
-      console.error("❌ Error saving message:", error);
+      console.error("Error saving message:", error);
     }
   });
 
+  // ** Handle user disconnect **
   socket.on("disconnect", () => {
     if (socket.username) {
       activeUsers.delete(socket.username);
@@ -101,10 +140,10 @@ io.on("connection", (socket) => {
         message: `${socket.username} left the chat`,
         system: true,
       });
-      console.log(`🔴 User disconnected: ${socket.username}`);
+      console.log(`User disconnected: ${socket.username}`);
     }
   });
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

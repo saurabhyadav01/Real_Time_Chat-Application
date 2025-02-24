@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
-import { Send, User, LogOut } from "lucide-react";
 
 interface Message {
   id?: number;
@@ -74,12 +73,10 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-200 p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       {!joined ? (
-        <div className="p-6 bg-white rounded-md shadow-lg w-full max-w-md">
-          <h2 className="text-2xl font-semibold mb-4 flex items-center text-black">
-            <User className="mr-2 text-black" /> Enter Your Name
-          </h2>
+        <div className="p-6 bg-white rounded-lg shadow-md w-full max-w-md">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Enter Your Name</h2>
           <input
             type="text"
             placeholder="Your name..."
@@ -96,16 +93,14 @@ export default function Chat() {
           </button>
         </div>
       ) : (
-        <div className="w-full max-w-lg bg-white p-5 rounded-md shadow-lg flex flex-col h-[80vh]">
-          {/* Chat Header */}
+        <div className="w-full max-w-lg bg-white p-5 rounded-lg shadow-lg flex flex-col h-[80vh]">
           <div className="flex justify-between items-center pb-3 border-b mb-3">
             <h2 className="text-xl font-semibold text-gray-700">Chat Room</h2>
             <button onClick={leaveChat} className="text-red-500 hover:text-red-600">
-              <LogOut size={22} />
+              Leave
             </button>
           </div>
 
-          {/* Chat Messages */}
           <div className="flex-1 overflow-y-auto p-3 bg-gray-50 rounded-md">
             {messages.length > 0 ? (
               messages.map((msg, index) => (
@@ -114,16 +109,18 @@ export default function Chat() {
                   className={`flex mb-3 ${msg.username === username ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`p-3 max-w-xs rounded-md text-white shadow-lg ${
+                    className={`p-3 max-w-xs rounded-lg text-white shadow-md ${
                       msg.system
                         ? "bg-gray-400 text-gray-900"
                         : msg.username === username
                         ? "bg-green-500"
+                        : msg.username === "Chatbot"
+                        ? "bg-blue-500"
                         : "bg-gray-700"
                     }`}
                   >
                     {!msg.system && (
-                      <strong className="block text-xs text-gray-300">{msg.username}</strong>
+                      <span className="block text-xs text-gray-300">{msg.username}</span>
                     )}
                     <p className="text-base">{msg.message}</p>
                   </div>
@@ -135,7 +132,6 @@ export default function Chat() {
             <div ref={messagesEndRef}></div>
           </div>
 
-          {/* Message Input */}
           <div className="flex items-center border rounded-md overflow-hidden bg-white shadow mt-3">
             <input
               type="text"
@@ -149,7 +145,7 @@ export default function Chat() {
               onClick={sendMessage}
               className="p-3 bg-green-500 text-white hover:bg-green-600 transition duration-300 rounded-r-md"
             >
-              <Send size={22} />
+              Send
             </button>
           </div>
         </div>
