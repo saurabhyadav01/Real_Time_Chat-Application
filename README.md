@@ -32,7 +32,7 @@ Ensure you have the following installed:
 
 ### 2️⃣ Clone the Repository
 ```sh
-git clone https://github.com/your-username/Real_Time_Chat-Application.git
+git clone https://github.com/saurabhyadav01/Real_Time_Chat-Application
 cd Real_Time_Chat-Application
 ```
 
