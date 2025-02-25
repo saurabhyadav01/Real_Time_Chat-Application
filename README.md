@@ -133,4 +133,3 @@ For any questions, reach out to **sy966051@gmail.com**.
 
 ```
 
-This includes **SQL configuration**, **.env setup**, and **detailed installation steps**. Let me know if you need further modifications! 🚀
