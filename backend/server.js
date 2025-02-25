@@ -45,14 +45,20 @@ app.get("/messages", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch messages" });
   }
 });
-
-// ** OpenAI Chatbot Function **
 async function getChatbotResponse(userMessage) {
+  // **Predefined fallback responses**
+  const fallbackResponses = {
+    help: "Our AI assistant is currently unavailable. Visit our support page for help.",
+    support: "AI services are down. Contact customer support at support@example.com.",
+    default: "I'm sorry, but I couldn't process your request right now. Please try again later.",
+  };
+
   try {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",  // Using GPT-4o-mini
+        store: true,           // Store conversation for context
         messages: [{ role: "user", content: userMessage }],
       },
       {
@@ -62,12 +68,20 @@ async function getChatbotResponse(userMessage) {
         },
       }
     );
+
     return response.data.choices[0].message.content;
   } catch (error) {
-    console.error("Error getting chatbot response:", error.response?.data || error.message);
-    return "I'm sorry, but I couldn't process your request.";
+    console.error("OpenAI API Error:", error.response?.data || error.message);
+
+    // **Check user message for fallback response**
+    const lowerMsg = userMessage.toLowerCase();
+    if (lowerMsg.includes("help")) return fallbackResponses.help;
+    if (lowerMsg.includes("support")) return fallbackResponses.support;
+
+    return fallbackResponses.default;
   }
 }
+
 
 // ** Socket.io Real-Time Chat Logic **
 io.on("connection", (socket) => {
