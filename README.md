@@ -4,6 +4,7 @@ Here's the **README.md** file with **environment (.env) configuration** and **SQ
 
 ![Screenshot (399)](https://github.com/user-attachments/assets/fb827777-a74c-44df-a875-d1f0ab6b5fa9)
 
+![Screenshot (398)](https://github.com/user-attachments/assets/6d6aa8f0-edb4-415b-8c37-001f1d8d209e)
 
 
 ```md
